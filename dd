@@ -1,0 +1,4 @@
+while True:
+                dagrun = DagRun.find(dag_id=dag_id, state='running')
+                if not dagrun:
+                    break
