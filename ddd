@@ -1,0 +1,5 @@
+dag_status = subprocess.run(['airflow', 'dags', 'status', dag_id], capture_output=True, text=True)
+            if dag_status.returncode == 0:
+                # Wait until the DAG is completed successfully
+                while dag_status.stdout != 'SUCCESS':
+                    dag_status = subprocess.run(['airflow', 'dags', 'status', dag_id], capture_output=True, text=True)
