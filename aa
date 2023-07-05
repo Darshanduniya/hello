@@ -1,0 +1,3 @@
+dag_status = subprocess.run(['airflow', 'dags', 'status', dag_id], capture_output=True, text=True)
+            while dag_status.stdout != 'SUCCESS':
+                dag_status = subprocess.run(['airflow', 'dags', 'status', dag_id], capture_output=True, text=True)
