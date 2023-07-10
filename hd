@@ -1,0 +1,37 @@
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+from datetime import datetime, timedelta
+
+def print_hello():
+    print('Hello, World!')
+
+def check_dag_state(**context):
+    dag_state = context['task_instance'].xcom_pull(task_ids='print_hello')
+    if dag_state == 'running':
+        print('The DAG is still running.')
+    else:
+        print('The DAG has completed.')
+
+default_args = {
+    'owner': 'airflow',
+    'start_date': datetime(2023, 7, 10),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5)
+}
+
+dag = DAG('hello_world_dag', default_args=default_args, schedule_interval=None)
+
+task1 = PythonOperator(
+    task_id='print_hello',
+    python_callable=print_hello,
+    dag=dag
+)
+
+task2 = PythonOperator(
+    task_id='check_dag_state',
+    python_callable=check_dag_state,
+    provide_context=True,
+    dag=dag
+)
+
+task1 >> task2
