@@ -1,11 +1,15 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
-from airflow.models import DagRun
-import time
+from time import sleep
 
 def print_hello():
     print('Hello, World!')
+
+def sleep_task():
+    print('Sleeping for 5 minutes...')
+    sleep(300)  # Sleep for 5 minutes (300 seconds)
+    print('Sleep complete.')
 
 def check_dag_state():
     dag_id = 'your_dag_id'
@@ -20,7 +24,7 @@ def check_dag_state():
                 print('DAG is still running. Waiting for completion...')
         else:
             print('DAG is not found.')
-        time.sleep(60)  # Wait for 1 minute before checking again
+        sleep(60)  # Wait for 1 minute before checking again
 
 default_args = {
     'owner': 'airflow',
@@ -38,9 +42,15 @@ task1 = PythonOperator(
 )
 
 task2 = PythonOperator(
+    task_id='sleep_task',
+    python_callable=sleep_task,
+    dag=dag
+)
+
+task3 = PythonOperator(
     task_id='check_dag_state',
     python_callable=check_dag_state,
     dag=dag
 )
 
-task1 >> task2
+task1 >> task2 >> task3
