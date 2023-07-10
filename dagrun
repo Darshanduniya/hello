@@ -1,0 +1,42 @@
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+from datetime import datetime, timedelta
+from airflow.models import DagRun, DagStat
+
+def print_hello():
+    print('Hello, World!')
+
+def check_dag_state():
+    dag_id = 'your_dag_id'
+    dag_run = DagRun.find(dag_id=dag_id)
+    if dag_run:
+        dag_state = dag_run[0].state
+        if dag_state == 'success':
+            print('The DAG has completed.')
+        else:
+            print('The DAG is still running.')
+    else:
+        print('The DAG is not found.')
+
+default_args = {
+    'owner': 'airflow',
+    'start_date': datetime(2023, 7, 10),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5)
+}
+
+dag = DAG('hello_world_dag', default_args=default_args, schedule_interval=None)
+
+task1 = PythonOperator(
+    task_id='print_hello',
+    python_callable=print_hello,
+    dag=dag
+)
+
+task2 = PythonOperator(
+    task_id='check_dag_state',
+    python_callable=check_dag_state,
+    dag=dag
+)
+
+task1 >> task2
